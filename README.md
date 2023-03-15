@@ -24,7 +24,7 @@
 
 小组对目标机上的小车代码进行了研读，把握各个子系统的功能。程序简略运行流程图如下：
 
-![image-20230315220926727](/Users/dzy/Desktop/Huawei-Atlas200DK-Car/assets/1.png)
+![image-20230315220926727](assets/1.png)
 
 1. 运行环境初始化：运行时资源分配，模型推理资源分配，iic端口测试（车轮控制），摄像头初始化，共享内存区域创建。
 2. 在新开线程中进行socket tcp server创建。在检测到有客户端连接后，调用2次fork()函数，创建2个子进程分别用于接收远程控制命令与实时发送摄像头图像。
@@ -50,23 +50,23 @@
 
 最终采取方案三的方法，在父进程的主循环中、图像预处理后，插入修改共享存储区的代码，如下：
 
-![image-20230315221313757](/Users/dzy/Desktop/Huawei-Atlas200DK-Car/assets/3.png)
+![image-20230315221313757](assets/3.png)
 
 共享存储区设置如下：
 
- ![image-20230315221344499](/Users/dzy/Desktop/Huawei-Atlas200DK-Car/assets/4.png)
+ ![image-20230315221344499](assets/4.png)
 
 摄像头拍摄到的图像是YUV420SP颜色编码格式，帧数为5，分辨率为1280\*720。采用YUV420SP编码格式的图像大小为w\*h\*1.5（关于YUV420SP详见附录1），故若传输原始图像，需要的带宽为6.912MB/s，再加上各种传输延迟与网络状况的不稳定，可能导致各种意外情况，故小组决定传输预处理后的图像。预处理后的图像大小为224*224，极大的减小了带宽需求。
 
 我们进一步对图像传输的代码进行了修改，去掉了无用的头部信息，减少传输带宽需求。图像传输的代码如下：
 
-![image-20230315221426975](/Users/dzy/Desktop/Huawei-Atlas200DK-Car/assets/5.png)
+![image-20230315221426975](assets/5.png)
 
 在接收远程命令方面，原代码已经足够完善，故并未做出更进一步修改。
 
 修改后程序流程图如下：
 
-![image-20230315221441675](/Users/dzy/Desktop/Huawei-Atlas200DK-Car/assets/6.png)
+![image-20230315221441675](assets/6.png)
 
 ### 2.3 远程控制客户端
 
@@ -79,15 +79,15 @@
 
 客户端界面如下：
 
-![image-20230315221531968](/Users/dzy/Desktop/Huawei-Atlas200DK-Car/assets/7.png)
+![image-20230315221531968](assets/7.png)
 
 图像解码与显示的核心代码如下：
 
-<img src="/Users/dzy/Desktop/Huawei-Atlas200DK-Car/assets/8.png" alt="image-20230315221551707" style="zoom:25%;" />
+<img src="assets/8.png" alt="image-20230315221551707" style="zoom:25%;" />
 
 发送命令切换模式的代码如下：
 
-<img src="/Users/dzy/Desktop/Huawei-Atlas200DK-Car/assets/9.png" alt="image-20230315221604074" style="zoom:25%;" />
+<img src="assets/9.png" alt="image-20230315221604074" style="zoom:25%;" />
 
 其中命令长度为6个字节，前两个字节固定，用于校验传输十分出错。第三个字节为命令码，后3个字节为参数。
 
@@ -95,9 +95,9 @@
 
 远程控制的核心代码如下：
 
-<img src="/Users/dzy/Desktop/Huawei-Atlas200DK-Car/assets/10.png" alt="image-20230315221615441" style="zoom:25%;" />
+<img src="assets/10.png" alt="image-20230315221615441" style="zoom:25%;" />
 
-<img src="/Users/dzy/Desktop/Huawei-Atlas200DK-Car/assets/11.png" alt="image-20230315221624383" style="zoom:25%;" />
+<img src="assets/11.png" alt="image-20230315221624383" style="zoom:25%;" />
 
 
 
@@ -117,4 +117,4 @@ YUV码流的存储格式其实与其采样的方式密切相关，主流的采�
 
 项目小车摄像头采用的是YUV420SP格式，SP指的是Y通道的信息与UV通道信息的存储顺序，如下图所示：
 
-![image-20230315221645247](/Users/dzy/Desktop/Huawei-Atlas200DK-Car/assets/12.png)
+![image-20230315221645247](assets/12.png)
